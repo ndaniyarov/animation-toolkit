@@ -19,6 +19,7 @@ class Unique : public atkui::Framework {
   }
 
   virtual void setup() {
+    //snow particles
     for (int i = 0; i < 200; i++){
       particle p;
       p.position = vec3(randomX(), randomY(), 600);
@@ -29,15 +30,18 @@ class Unique : public atkui::Framework {
   }
 
   virtual void scene() {
+    //background
     setColor(vec3(.68, .85, .9));
     drawSphere(vec3(width()/2.0, height()/2.0, -50), 700);
+    //floor
     setColor(vec3(.83,.83,.83));
     drawSphere(vec3(width()/2.0, -100, 100), 600);
+    //snowman
     setColor(vec3(1,1,1));
     drawSphere(vec3(width()/2.0, height()/2.0-100, 300), 150);
     drawSphere(vec3(width()/2.0, height()/2.0, 400), 100);
+    //eyes
     setColor(vec3(0,0,0));
-
     theta += thetaRate * 10* dt();
     float px = 110 + 25 * (cos(theta)) + 0.3* width();
     float py = 0.5 * height();
