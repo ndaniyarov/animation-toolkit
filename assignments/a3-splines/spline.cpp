@@ -101,10 +101,28 @@ glm::vec3 Spline::getValue(float t) const {
     mInterpolator->computeControlPoints(mKeys);
     mDirty = false;
   }
+  int segment = -1;
+  if (mKeys.size() == 0){
+    return glm::vec3(0.0);
+  }
+  if (mKeys.size() == 1 || t <= mTimes[0]){
+    return mKeys[0];
+  }
+  if (t >= mTimes[mTimes.size()-1]){
+    return mKeys[mKeys.size()-1];
+  }
+  
+  for (int i = 0; i < mTimes.size(); i++){
+    if (mTimes[i+1] >t && segment > mTimes.size()-1)
+      segment = i;
+  }
+  float ti = mTimes.at(segment);
+  float ti1 = mTimes.at(segment + 1);
 
+  float u = (t - ti)/(ti1-ti);
   // todo: your code here
   // compute the segment containing t
   // compute the value [0, 1] along the segment for interpolation
-  return glm::vec3(0); 
+  return mInterpolator->interpolate(segment,u); 
 }
 

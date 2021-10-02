@@ -15,7 +15,8 @@ int main()
 
    InterpolatorHermite hermite;
    hermite.computeControlPoints(keys);
-
+   hermite.setClampedDirection(vec3(1.0, 0.0, 0.0));
+   hermite.computeControlPoints(keys);
    // todo: print the control points in hemite
    // verify they match the example from class!
    for (int i = 0; i < hermite.getNumControlPoints(); i++)

@@ -6,6 +6,7 @@ using glm::vec2;
 
 int main()
 {
+
     vec2 p0(0,0); // Z will just be zero
     vec2 p1(1,2);
     vec2 p2(3,3);
