@@ -302,13 +302,16 @@ void Matrix3::fromEulerAnglesZYX(const Vector3& angleRad)
 
 void Matrix3::toAxisAngle(Vector3& axis, double& angleRad) const
 {
-   // TODO
+   Quaternion final;
+   final.fromMatrix(*this);
+   final.toAxisAngle(axis,angleRad);
 }
 
 void Matrix3::fromAxisAngle(const Vector3& axis, double angleRad)
 {
-   // TODO
-   *this = Identity;
+   Quaternion final;
+   final.fromAxisAngle(axis, angleRad);
+   *this = final.toMatrix();
 }
 
 }
