@@ -35,13 +35,13 @@ class Gradient : public atkui::Framework {
            pop();
          }
          else {
-               // push();
-               // translate(vec3(x,y,0));
-               // temp = theta * pow(0.1,dt());
-               // rotate(temp, vec3(0,0,1));
-               // drawCube(vec3(0,0,0), vec3(20,1,0));
-               // pop();
-            drawCube(vec3(x,y,0), vec3(20,1,0));
+               push();
+               translate(vec3(x,y,0));
+               temp = theta * pow(0.1,dt());
+               rotate(temp, vec3(0,0,1));
+               drawCube(vec3(0,0,0), vec3(20,1,0));
+               pop();
+            //drawCube(vec3(x,y,0), vec3(20,1,0));
 
          }
       }

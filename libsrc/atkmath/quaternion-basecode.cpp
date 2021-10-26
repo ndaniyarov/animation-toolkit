@@ -6,25 +6,16 @@ namespace atkmath {
 
 Quaternion Quaternion::Slerp(const Quaternion& q0, const Quaternion& q1, double t)
 {
-	//Quaternion result;
-	//float dot = Dot(q0,q1);
 	return Quaternion(1,0,0,0);
 }
 
 void Quaternion::toAxisAngle (Vector3& axis, double& angleRad) const
 {
 	angleRad = acos(mW)*2.0f;
-	// Vector3 vec = Vector3(mX,mY,mZ);
-	// if (vec.length() == 0){
-	// 	axis = Vector3(0,0,0);
-	// }
-	// else {
 		float x = mX/sin(angleRad/2.0f);
 		float y = mY/sin(angleRad/2.0f);
 		float z = mZ/sin(angleRad/2.0f);
-		//vec = Vector3(x,y,z);
 		axis = Vector3(x,y,z);
-	//}
 }
 
 void Quaternion::fromAxisAngle (const Vector3& axis, double angleRad)
@@ -35,9 +26,7 @@ void Quaternion::fromAxisAngle (const Vector3& axis, double angleRad)
 	mW = cos(angleRad/2.0f);
 	 Quaternion q = Quaternion(mX,mY,mZ,mW);
 	 *this = q;
-	// if (q.length() != 0){
 	normalize();
-	//}
 }
 
 Matrix3 Quaternion::toMatrix () const
@@ -93,9 +82,7 @@ void Quaternion::fromMatrix(const Matrix3& rot)
 	}
 	Quaternion q = Quaternion(mX,mY,mZ,mW);
 	*this = q;
-	// if (q.length() != 0){
 	normalize();
-	//}
 }
 
 }
