@@ -37,7 +37,7 @@ int main(int argc, char** argv)
    } 
 
    // Get the joint for the hand by looking up by name ("Beta:LeftHand")
-   Joint* hand = skeleton.getByName("Beta:LeftHand");
+   Joint* hand = skeleton.getByName("Beta:LeftHand\r");
    vec3 offset =  hand->getLocalTranslation(); // todo get the local offset from the hand to its parent 
    std::cout << "The offset between the left hand and its parent is " << glm::to_string(offset) << std::endl;
 
