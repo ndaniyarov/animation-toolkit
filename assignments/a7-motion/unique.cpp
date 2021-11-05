@@ -5,125 +5,106 @@
 using namespace glm;
 using namespace atk;
 
-class Butterfly : public atkui::Framework
+class MotionViewer : public atkui::Framework
 {
 public:
-   Butterfly() : atkui::Framework(atkui::Perspective) {
+   MotionViewer() : atkui::Framework(atkui::Perspective) {
    }
 
    void setup() {
-      Joint* body = new Joint("Body");
-      body->setLocalTranslation(vec3(1,2,1)*100.0f);
-      body->setLocalRotation(glm::angleAxis(glm::radians<float>(45.0f), vec3(0,1,0)));
-      skeleton.addJoint(body);
-
-      Joint* lwing = new Joint("LWing");
-      lwing->setLocalTranslation(vec3(0.1,0,0)*100.0f);
-      skeleton.addJoint(lwing, body);
-
-      Joint* lwing2 = new Joint("LWing2");
-      lwing2->setLocalTranslation(vec3(0.1,0,0)*100.0f);
-      skeleton.addJoint(lwing2, body);
-
-      Joint* rwing = new Joint("RWing");
-      rwing->setLocalTranslation(vec3(-0.1,0,0)*100.0f);
-      skeleton.addJoint(rwing, body);
-
-      Joint* rwing2 = new Joint("RWing2");
-      rwing2->setLocalTranslation(vec3(-0.1,0,0)*100.0f);
-      skeleton.addJoint(rwing2, body);
-
-
-      skeleton.fk();
+      BVHReader reader;
+      reader.load("../motions/Beta/samba_dancing.bvh", skeleton, motion);
+      motion.update(skeleton, 0);
    }
 
    void scene() {
-      Joint* body = skeleton.getByName("Body");
-      Joint* lwing = skeleton.getByName("LWing");
-      lwing->setLocalRotation(glm::angleAxis(sin(elapsedTime()), vec3(0,0,1)));
-
-      Joint* lwing2 = skeleton.getByName("LWing2");
-      lwing2->setLocalRotation(glm::angleAxis(sin(elapsedTime()), vec3(0,0,1)));
-
-      Joint* rwing = skeleton.getByName("RWing");
-      rwing->setLocalRotation(glm::angleAxis(-sin(elapsedTime()), vec3(0,0,1))); 
-
-      Joint* rwing2 = skeleton.getByName("RWing");
-      rwing2->setLocalRotation(glm::angleAxis(-sin(elapsedTime()), vec3(0,0,1)));
-
-      skeleton.fk();
-
-      // attach geometry to skeleton 
-      Transform B = body->getLocal2Global(); 
-      Transform LT = lwing->getLocal2Global(); 
-      Transform RT = rwing->getLocal2Global(); 
-      Transform LT2 = lwing2->getLocal2Global(); 
-      Transform RT2 = rwing2->getLocal2Global();
-
-      // draw body
-      Transform bodyGeometry(
-         glm::angleAxis(glm::pi<float>()*0.5f, vec3(1,0,0)), // rotation
-         vec3(0), vec3(25, 200, 25)); // position, scale
-      Transform lwingGeometry(
-         eulerAngleRO(XYZ, vec3(0,-M_PI/4,0)),
-         vec3(-70,0,-60), 
-         vec3(120,20,80));
-      Transform lwing2Geometry(
-         eulerAngleRO(XYZ, vec3(0,M_PI/4,0)),
-         vec3(-70,0,40), 
-         vec3(140,20,120));
-      Transform rwingGeometry(
-         eulerAngleRO(XYZ, vec3(0,M_PI/4,0)),
-         vec3(70,0,-60), 
-         vec3(120,20,80));
-      Transform rwing2Geometry(
-         eulerAngleRO(XYZ, vec3(0,-M_PI/4,0)),
-         vec3(70,0,40), 
-         vec3(140,20,120));
-
-      setColor(vec3(0.4, 0.4, 0.8));
-      push();
-      transform(B * bodyGeometry);
-      drawSphere(vec3(0), 1);
-      pop();
-
-      setColor(vec3(0.8, 0, 0.0));
-      push();
-      transform(LT * lwingGeometry);
-      drawSphere(vec3(0), 1);
-      pop();
-
-      setColor(vec3(0, 0.8, 0.0));
-      push();
-      transform(LT2 * lwing2Geometry);
-      drawSphere(vec3(0), 1);
-      pop();
-
-      setColor(vec3(0.8, 0, 0.0));
-      push();
-      transform(RT * rwingGeometry);
-      drawSphere(vec3(0), 1);
-      pop();
-
-      setColor(vec3(0, 0.8, 0.0));
-      push();
-      transform(RT2 * rwing2Geometry);
-      drawSphere(vec3(0), 1);
-      pop();
-   }
- virtual void keyUp(int key, int mods) {
-      if (key == GLFW_KEY_SPACE) {
-         axes = !axes;
+      if (pressed0) {
+         time = 0;
+         pressed0 = false;
       }
- }
+      if (paused) {
+         if (pressedPeriod) {
+            time = time + motion.getDeltaTime();
+            pressedPeriod = false;
+         }
+         else if (pressedComma){
+            time = time - motion.getDeltaTime();
+            pressedComma = false;
+         }
+         motion.update(skeleton, time);
+      }
+      if (pressedIncreaseSpeed) {
+         timeScale += 0.1;
+         motion.setDeltaTime(motion.getDeltaTime() - 0.01);
+         motion.update(skeleton, time);
+         pressedIncreaseSpeed = false;
+      }
+      if (pressedDecreaseSpeed) {
+         timeScale -= 0.1;
+         motion.update(skeleton, time);
+         motion.setDeltaTime(motion.getDeltaTime() + 0.01);
+         pressedDecreaseSpeed = false;
+         
+      }
+      if (!paused)   {
+         time += dt();
+         motion.update(skeleton, time);
+      }
+
+         currentFrame = motion.getFramerate()*time;
+      setColor(vec3(0.8,0,0.8));
+      for (int i = 0; i < skeleton.getNumJoints(); i++) {
+         Joint* joint = skeleton.getByID(i);
+         if (joint->getParent() == 0) continue;
+
+         vec3 p1 = joint->getGlobalTranslation();
+         vec3 p2 = joint->getParent()->getGlobalTranslation();
+         drawSphere(p1, 45);
+      }
+
+      drawText(paused? "Paused" : "Playing", 10, 15);
+      drawText("Current frame: "+std::to_string(currentFrame), 10, 35);
+      drawText("Time scale: "+std::to_string(timeScale), 10, 55);
+   }
+
+   virtual void keyUp(int key, int mods) {
+      if (key == GLFW_KEY_P) {
+         paused = !paused;
+      }
+      if (key == GLFW_KEY_0) {
+         pressed0 = true;
+      }
+      if (key == GLFW_KEY_PERIOD) {
+         pressedPeriod = true;
+      }
+      if (key == GLFW_KEY_COMMA) {
+         pressedComma = true;
+      }
+      if (key == GLFW_KEY_RIGHT_BRACKET) {
+         pressedIncreaseSpeed = true;
+      }
+      if (key ==GLFW_KEY_LEFT_BRACKET) {
+         pressedDecreaseSpeed = true;
+      }
+   }
+
 private:
-   bool axes = false;
    Skeleton skeleton;
+   Motion motion;
+
+   float timeScale = 1.0f;
+   int currentFrame = 0; 
+   bool paused = false;
+   bool pressed0 = false;
+   bool pressedPeriod = false;
+   bool pressedComma = false;
+   bool pressedIncreaseSpeed = false;
+   bool pressedDecreaseSpeed = false;
+   float time = 0;
 };
 
 
 int main(int argc, char** argv) {
-   Butterfly viewer;
+   MotionViewer viewer;
    viewer.run();
 }
-

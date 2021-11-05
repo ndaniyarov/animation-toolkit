@@ -110,6 +110,27 @@ public:
       transform(RT2 * rwing2Geometry);
       drawSphere(vec3(0), 1);
       pop();
+
+      if (axes == true) {
+         setColor(vec3(1,0,0));
+         push();
+         transform(B);
+         drawEllipsoid(vec3(0),vec3(0,300,0),2);
+         pop();
+
+         setColor(vec3(0,1,0));
+         push();
+         transform(B);
+         drawEllipsoid(vec3(0),vec3(300,0,0),2);
+         pop();
+
+         setColor(vec3(0,0,1));
+         push();
+         transform(B);
+         drawEllipsoid(vec3(0),vec3(0,0,300),2);
+         pop();
+
+      }
    }
  virtual void keyUp(int key, int mods) {
       if (key == GLFW_KEY_SPACE) {
