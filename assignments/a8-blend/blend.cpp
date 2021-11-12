@@ -1,6 +1,7 @@
 #include "atk/toolkit.h"
 #include "atkui/framework.h"
 #include "atkui/skeleton_drawer.h"
+
 #include <algorithm>
 #include <string>
 
@@ -29,8 +30,14 @@ public:
       Motion blend;
       blend.setFramerate(m1.getFramerate());
 
-      // todo: replace the following line with your code
-      blend.appendKey(m1.getKey(0)); // placeholder
+      double duration = m1.getDuration() * (1-alpha) + m2.getDuration() * alpha;
+      float deltaT = (float)1.0f/m1.getFramerate();
+      for (double i = 0; i <= duration; i+=deltaT){
+         Pose pose1 = m1.getValue(i/duration * m1.getDuration());
+         Pose pose2 = m2.getValue(i/duration * m2.getDuration());
+         Pose newPose = Pose::Lerp(pose1, pose2, alpha);
+         blend.appendKey(newPose);
+      }
       return blend;
    }
 

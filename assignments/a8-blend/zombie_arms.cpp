@@ -32,11 +32,27 @@ public:
       Joint* leftElbow = _skeleton.getByName("Beta:LeftForeArm");
       Joint* rightElbow = _skeleton.getByName("Beta:RightForeArm");
 
-      Motion result;
-      result.setFramerate(motion.getFramerate());
-      // todo: your code here
-      result.appendKey(motion.getKey(0));
+      int leftArmID = leftArm->getID();
+      int rightArmID = rightArm->getID();
+      int leftElbowID = leftElbow->getID();
+      int rightElbowID = rightElbow->getID();
 
+      Motion result;
+
+      quat leftOffset = leftLocalRot * inverse(leftArm->getLocalRotation());
+      quat rightOffset = rightLocalRot * inverse(rightArm->getLocalRotation());
+
+      result.setFramerate(motion.getFramerate());
+
+      for (int i = 0; i < motion.getNumKeys(); i++){
+         Pose pose = motion.getKey(i);
+
+         pose.jointRots[leftArmID] = pose.jointRots[leftArmID] * leftOffset;
+         pose.jointRots[rightArmID] = pose.jointRots[rightArmID] * rightOffset;
+         pose.jointRots[leftElbowID] = elbowLocalRot;
+         pose.jointRots[rightElbowID] = elbowLocalRot;
+         result.appendKey(pose);
+      }
       return result;
    }
 
@@ -51,11 +67,22 @@ public:
       Joint* leftElbow = _skeleton.getByName("Beta:LeftForeArm");
       Joint* rightElbow = _skeleton.getByName("Beta:RightForeArm");
 
+      int leftArmID = leftArm->getID();
+      int rightArmID = rightArm->getID();
+      int leftElbowID = leftElbow->getID();
+      int rightElbowID = rightElbow->getID();
+
       Motion result;
       result.setFramerate(motion.getFramerate());
-      // todo: your code here
-      result.appendKey(motion.getKey(0));
 
+      for (int i = 0; i < motion.getNumKeys(); i++){
+         Pose pose = motion.getKey(i);
+         pose.jointRots[leftArmID] = leftRot;
+         pose.jointRots[rightArmID] = rightRot;
+         pose.jointRots[leftElbowID] = elbowRot;
+         pose.jointRots[rightElbowID] = elbowRot;
+         result.appendKey(pose);
+      }
       return result;
    }
 

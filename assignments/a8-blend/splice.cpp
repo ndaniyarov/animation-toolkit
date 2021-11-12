@@ -24,12 +24,32 @@ public:
       _splice = spliceUpperBody(_lower, _upper, _alpha);
    }
 
+   bool isUpper(const Joint* parent, Joint* current) {
+         while (current != NULL) {
+            if(current->getName() == parent->getName()){
+               return true;
+            }
+            current = current->getParent();
+         }
+         return false;
+   }
+
    Motion spliceUpperBody(const Motion& lower, const Motion& upper, float alpha)
    {
+      Joint* upperJoint = _skeleton.getByName("Beta:Spine1");
       Motion result;
       result.setFramerate(lower.getFramerate());
-      // todo: your code here
-      result.appendKey(lower.getKey(0));
+
+      for (int i = 0; i < lower.getNumKeys(); i++) {
+         Pose pose = lower.getKey(i);
+         Pose newPose = pose;
+         for (int j = 0; j < pose.jointRots.size(); j++) {
+            if (isUpper(upperJoint, _skeleton.getByID(j))) {
+               newPose.jointRots[j] = glm::slerp(upper.getKey(i+120).jointRots[j], pose.jointRots[j], alpha);
+            }
+         }
+         result.appendKey(newPose);
+      }
       return result;
    }
 
