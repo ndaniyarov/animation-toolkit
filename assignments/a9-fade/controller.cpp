@@ -23,6 +23,7 @@ public:
   virtual void scene()
   {
     update();
+    
     _drawer.draw(_skeleton, *this);
 
     // draw heading
@@ -42,11 +43,19 @@ public:
   virtual void update()
   {
     _walk.update(_skeleton, elapsedTime());
+    vec3 origPos = _walk.getKey(0).rootPos;
+    vec3 pos;
+    quat rot = glm::angleAxis(_heading, vec3(0,1,0));
+    for (int i = 0; i < _walk.getNumKeys(); i++) {
+      Pose p = _walk.getKey(i);
+      p.rootPos = origPos;
+      p.jointRots[0] = rot;
+      _walk.editKey(i, p);
+    }
 
-    // TODO: Your code here
-
+    glm::vec3 moveFwd = _skeleton.getByName("Beta:Head")->getLocal2Global().transformVector(glm::vec3(0,0,-190));
     // TODO: Override the default camera to follow the character
-    // lookAt(pos, look, vec3(0, 1, 0));
+    lookAt(_skeleton.getByName("Beta:Head")->getGlobalTranslation()+moveFwd, _skeleton.getByName("Beta:Head")->getGlobalTranslation(), vec3(0, 1, 0));
 
     // update heading when key is down
     if (keyIsDown('D')) _heading -= 0.05;

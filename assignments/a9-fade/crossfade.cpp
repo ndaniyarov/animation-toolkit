@@ -34,10 +34,42 @@ public:
     assert(numBlendFrames <= motion1_.getNumKeys());
     assert(numBlendFrames <= motion2_.getNumKeys());
 
-    int start1 = motion1_.getNumKeys() - numBlendFrames;
+    blend_.setFramerate(motion1_.getFramerate());
+    int start1 = motion1_.getNumKeys() - 1;
     int start2 = 0;
 
-    // TODO: Your code here
+    for (int i = 0; i < motion1_.getNumKeys(); i++) {
+      blend_.appendKey(motion1_.getKey(i));
+    }
+
+    vec3 dDesired = motion1_.getKey(motion1_.getNumKeys()-1).rootPos;
+    quat rDesired = motion1_.getKey(motion1_.getNumKeys()-1).jointRots[0];
+    Transform desired = Transform(rDesired, dDesired);
+
+    vec3 dJump = motion2_.getKey(0).rootPos;
+    quat rJump = motion2_.getKey(0).jointRots[0];
+    Transform jump = Transform(rJump,dJump);
+
+    Transform offset = desired * jump.inverse();
+
+    for (int i = 0; i < motion2_.getNumKeys(); i++) {
+      Pose p2 = motion2_.getKey(i);
+      vec3 d3 = p2.rootPos;
+      quat r3 = p2.jointRots[0];
+      Transform current2 = Transform(r3, d3);
+      current2 = offset * current2;
+      p2.rootPos = current2.t();
+      p2.jointRots[0] = current2.r();
+      motion2_.editKey(i, p2);
+    }
+
+    for (float i = 0; i <=1; i+=0.1){
+      Pose p = Pose::Lerp(motion1_.getKey(start1), motion2_.getKey(start2), i);
+      blend_.appendKey(p);
+    }
+    for (int i = 0; i < motion2_.getNumKeys(); i++) {
+      blend_.appendKey(motion2_.getKey(i));
+    }
   }
 
   void save(const std::string &filename)
