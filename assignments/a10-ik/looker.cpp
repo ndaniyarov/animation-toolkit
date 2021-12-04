@@ -1,10 +1,13 @@
 #include "atk/toolkit.h"
 #include "atkui/framework.h"
 #include "cyclops.h"
+#include "atkmath/matrix3.h"
+#include "atkmath/quaternion.h"
 #include <algorithm>
 #include <string>
 
 using namespace atk;
+using namespace atkmath;
 using namespace glm;
 using namespace std;
 
@@ -29,7 +32,27 @@ public:
    }
 
    void lookAtTarget(Joint* head, const vec3& target) {
-      // TODO: Your code here
+      quat q;
+      Quaternion quat;
+      vec3 desired = target - head->getGlobalTranslation();
+      desired = normalize(desired);
+      
+
+      vec3 Z = desired;
+      vec3 X = normalize(cross(vec3(0,1,0),Z));
+      vec3 Y = normalize(cross(Z, X));
+
+      Matrix3 rot = Matrix3((double)X.x, (double)Y.x, (double)desired.x, 
+                            (double)X.y, (double)Y.y, (double)desired.y, 
+                            (double)X.z, (double)Y.z, (double)desired.z);
+      
+      quat = rot.toQuaternion();
+      q.x = quat.x();
+      q.y = quat.y();
+      q.z = quat.z();
+      q.w = quat.w();
+
+      head->setLocalRotation(head->getLocalRotation() * inverse(head->getGlobalRotation()) * q);
       head->fk();
    }
 
