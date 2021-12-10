@@ -10,7 +10,7 @@ using namespace atk;
 ABehavior::ABehavior(const char* name) : _name(name)
 {
    // TODO: set good values
-   setParam("MaxSpeed", 1);
+   setParam("MaxSpeed", 60);
    setParam("AgentRadius", 1);
 }
 
@@ -32,7 +32,10 @@ ASeek::ASeek() : ABehavior("Seek")
 vec3 ASeek::calculateDesiredVelocity(const ASteerable& actor,
    const AWorld& world, const vec3& target)
 {
-   return vec3(0,0,0);
+   vec3 pos = actor.getPosition();
+   vec3 dir = normalize(target - pos);
+   dir = dir * getParam("MaxSpeed");
+   return dir;
 }
 
 //--------------------------------------------------------------
@@ -53,7 +56,10 @@ AFlee::AFlee() : ABehavior("Flee")
 vec3 AFlee::calculateDesiredVelocity(const ASteerable& actor,
    const AWorld& world, const vec3& targetPos)
 {
-    return vec3(0,0,0);
+   vec3 pos = actor.getPosition();
+   vec3 dir = normalize(pos - targetPos);
+   dir = dir * getParam("MaxSpeed");
+   return dir;
 }
 
 //--------------------------------------------------------------
@@ -63,7 +69,7 @@ AArrival::AArrival() : ABehavior("Arrival")
 {
    // TODO: Set good parameters
    setParam("kArrival", 1);
-   setParam("TargetRadius", 1);
+   setParam("TargetRadius", 200);
 }
 
 //
@@ -75,7 +81,16 @@ AArrival::AArrival() : ABehavior("Arrival")
 vec3 AArrival::calculateDesiredVelocity(const ASteerable& actor,
    const AWorld& world, const vec3& targetPos)
 {
-    return vec3(0,0,0);
+   vec3 pos = actor.getPosition();
+   float r = getParam("TargetRadius");
+   vec3 targetOffset = targetPos - pos;
+   float dist = length(targetOffset);
+   float speed;
+   if (dist <= r)
+      speed = (dist/r) * getParam("MaxSpeed");
+   else 
+      speed = getParam("MaxSpeed");
+   return speed * normalize(targetOffset);
 }
 
 //--------------------------------------------------------------
@@ -84,7 +99,7 @@ vec3 AArrival::calculateDesiredVelocity(const ASteerable& actor,
 ADeparture::ADeparture() : ABehavior("Departure") 
 {
    setParam("InnerRadius", 1);
-   setParam("OuterRadius", 1);
+   setParam("OuterRadius", 200);
    setParam("kDeparture", 1);
 }
 
@@ -94,7 +109,16 @@ ADeparture::ADeparture() : ABehavior("Departure")
 vec3 ADeparture::calculateDesiredVelocity(const ASteerable& actor,
    const AWorld& world, const vec3& targetPos)
 {
-   return vec3(0,0,0);
+   vec3 pos = actor.getPosition();
+   float r = getParam("OuterRadius");
+   vec3 targetOffset = pos - targetPos;
+   float dist = length(targetOffset);
+   float speed;
+   if (dist <= r)
+      speed = (dist/r) * getParam("MaxSpeed");
+   else 
+      speed = getParam("MaxSpeed");
+   return speed * normalize(targetOffset);
 }
 
 //--------------------------------------------------------------

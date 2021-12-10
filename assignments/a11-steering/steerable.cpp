@@ -165,4 +165,9 @@ void ASteerable::setColor(const vec3& color)
    _drawer.color = color;
 } 
 
+void ASteerable::setJointRadius(float r)
+{
+   _drawer.jointRadius = r;
+} 
+
 

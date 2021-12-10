@@ -21,6 +21,7 @@ public:
    glm::vec3 getDesiredVelocity() const;
    glm::quat getRotation() const;
    void setColor(const glm::vec3& color); 
+   void setJointRadius(float r);
 
 private:
    void senseControlAct(const glm::vec3& veld, float dt);
